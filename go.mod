@@ -1,4 +1,4 @@
-module github.com/Crypt0plasm/SuperMath
+module SuperMath
 
 go 1.19
 
