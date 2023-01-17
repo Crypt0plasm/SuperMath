@@ -1,37 +1,38 @@
 package SuperMath
 
 import (
-	"fmt"
-	p "github.com/Crypt0plasm/Firefly-APD"
-	"os"
-	"strconv"
+    "fmt"
+    p "github.com/Crypt0plasm/Firefly-APD"
+    "os"
+    "strconv"
 )
 
 const (
-	MaxMathPrecision  = uint32(150) //Total and Decimal Precision
-	StdMathPrecision  = uint32(50)  //Total and Decimal Precision
-	XPPrecision       = uint32(8)
-	CurrencyPrecision = uint32(18)
-	PromillePrecision = uint32(6)
-	AuPerUnit         = "1000000000000000000" // Atomic Units per Cryptoplasm
+    MaxMathPrecision  = uint32(150) //Total and Decimal Precision
+    StdMathPrecision  = uint32(50)  //Total and Decimal Precision
+    XPPrecision       = uint32(8)
+    CurrencyPrecision = uint32(18)
+    PromillePrecision = uint32(6)
+    AuPerUnit         = "1000000000000000000" // Atomic Units per Cryptoplasm
 )
 
 var (
-	LOCPrecisionContext = p.Context{
-		Precision:   StdMathPrecision,
-		MaxExponent: p.MaxExponent,
-		MinExponent: p.MinExponent,
-		Rounding:    p.RoundDown,
-		// Default error conditions.
-		Traps: p.InvalidOperation,
-	}
-
-	c   = LOCPrecisionContext
-	AUs = p.NFS(AuPerUnit)
+    LOCPrecisionContext = p.Context{
+        Precision:   StdMathPrecision,
+        MaxExponent: p.MaxExponent,
+        MinExponent: p.MinExponent,
+        Rounding:    p.RoundDown,
+        // Default error conditions.
+        Traps: p.InvalidOperation,
+    }
+    
+    c   = LOCPrecisionContext
+    AUs = p.NFS(AuPerUnit)
 )
 //
 //
-//	        SuperMathFunctions.go				Precision Math Specific Functions
+//
+//	        MathFunctions.go				Precision Math Specific Functions
 //		Originally Created as:
 //		BlockChain_F.Firefly.go			        Cryptoplasm(Koson) Precision Math Specific Functions
 //
@@ -128,29 +129,29 @@ var (
 // Even thought it on itself is enough to secure total operation precision, it is used as extra buffer when computing
 // total operation precision for ADD SUB MUL and DIV functions. (because an additional DecimalPrecision is added on top of it)
 func SummedMaxLengthPlusOne(x, y *p.Decimal) uint32 {
-	var SML uint32
-	IntegerDigitsMember1 := Count4Coma(x)  //int64
-	IntegerDigitsMember2 := Count4Coma(y)  //int64
-	DecimalDigitsMember1 := 0 - x.Exponent //int32
-	DecimalDigitsMember2 := 0 - y.Exponent //int32
-
-	MaxIntegerDigitsInt64 := MaxInt64(IntegerDigitsMember1, IntegerDigitsMember2) //int64
-	MaxDecimalDigitsInt32 := MaxInt32(DecimalDigitsMember1, DecimalDigitsMember2) //int32
-
-	// Observation1
-	// Converting Int64 to Int32, going down from 9.223.372.036.854.775.807 to 2.147.483.647
-	// As 2.147.483.647 are already a huge number, no check is implemented here.
-	MaxIntegerDigitsInt32 := int32(MaxIntegerDigitsInt64)
-
-	// Observation 2
-	// SML is of uint32 type, this means this function works reliably for numbers with up to
-	// 2.147.483.647 digits each.
-	// Two times this is 4.294.967.294. Adding another 1 equals 4.294.967.295.
-	// This is the maximum number representable by uint32.
-	//
-	// So the maximum length x and y can have is 2.147.483.647 digits before and after the coma.
-	SML = uint32(MaxDecimalDigitsInt32) + uint32(MaxIntegerDigitsInt32) + 1
-	return SML
+    var SML uint32
+    IntegerDigitsMember1 := Count4Coma(x)  //int64
+    IntegerDigitsMember2 := Count4Coma(y)  //int64
+    DecimalDigitsMember1 := 0 - x.Exponent //int32
+    DecimalDigitsMember2 := 0 - y.Exponent //int32
+    
+    MaxIntegerDigitsInt64 := MaxInt64(IntegerDigitsMember1, IntegerDigitsMember2) //int64
+    MaxDecimalDigitsInt32 := MaxInt32(DecimalDigitsMember1, DecimalDigitsMember2) //int32
+    
+    // Observation1
+    // Converting Int64 to Int32, going down from 9.223.372.036.854.775.807 to 2.147.483.647
+    // As 2.147.483.647 are already a huge number, no check is implemented here.
+    MaxIntegerDigitsInt32 := int32(MaxIntegerDigitsInt64)
+    
+    // Observation 2
+    // SML is of uint32 type, this means this function works reliably for numbers with up to
+    // 2.147.483.647 digits each.
+    // Two times this is 4.294.967.294. Adding another 1 equals 4.294.967.295.
+    // This is the maximum number representable by uint32.
+    //
+    // So the maximum length x and y can have is 2.147.483.647 digits before and after the coma.
+    SML = uint32(MaxDecimalDigitsInt32) + uint32(MaxIntegerDigitsInt32) + 1
+    return SML
 }
 
 // ================================================================================================
@@ -163,14 +164,14 @@ func SummedMaxLengthPlusOne(x, y *p.Decimal) uint32 {
 //
 // MaxInt32 returns the maximum between two int32 numbers
 func MaxInt32(x, y int32) int32 {
-	var max int32
-	digdiff := x - y
-	if digdiff <= 0 {
-		max = y
-	} else if digdiff > 0 {
-		max = x
-	}
-	return max
+    var max int32
+    digdiff := x - y
+    if digdiff <= 0 {
+        max = y
+    } else if digdiff > 0 {
+        max = x
+    }
+    return max
 }
 
 // ================================================
@@ -179,14 +180,14 @@ func MaxInt32(x, y int32) int32 {
 //
 // MaxInt64 returns the maximum between two int64 numbers
 func MaxInt64(x, y int64) int64 {
-	var max int64
-	digdiff := x - y
-	if digdiff <= 0 {
-		max = y
-	} else if digdiff > 0 {
-		max = x
-	}
-	return max
+    var max int64
+    digdiff := x - y
+    if digdiff <= 0 {
+        max = y
+    } else if digdiff > 0 {
+        max = x
+    }
+    return max
 }
 
 // ================================================
@@ -195,13 +196,13 @@ func MaxInt64(x, y int64) int64 {
 //
 // MaxDecimal returns the maximum between two Decimals
 func MaxDecimal(x, y *p.Decimal) (max *p.Decimal) {
-	Difference := SUBxc(x, y)
-	if DecimalLessThanOrEqual(Difference, p.NFI(0)) == true {
-		max = y
-	} else if DecimalGreaterThan(Difference, p.NFI(0)) == true {
-		max = x
-	}
-	return max
+    Difference := SUBxc(x, y)
+    if DecimalLessThanOrEqual(Difference, p.NFI(0)) == true {
+        max = y
+    } else if DecimalGreaterThan(Difference, p.NFI(0)) == true {
+        max = x
+    }
+    return max
 }
 
 // ================================================
@@ -210,13 +211,13 @@ func MaxDecimal(x, y *p.Decimal) (max *p.Decimal) {
 //
 // MaxDecimal returns the maximum between two Decimals
 func MinDecimal(x, y *p.Decimal) (max *p.Decimal) {
-	Difference := SUBxc(x, y)
-	if DecimalLessThanOrEqual(Difference, p.NFI(0)) == true {
-		max = x
-	} else if DecimalGreaterThan(Difference, p.NFI(0)) == true {
-		max = y
-	}
-	return max
+    Difference := SUBxc(x, y)
+    if DecimalLessThanOrEqual(Difference, p.NFI(0)) == true {
+        max = x
+    } else if DecimalGreaterThan(Difference, p.NFI(0)) == true {
+        max = y
+    }
+    return max
 }
 
 // ================================================================================================
@@ -230,19 +231,19 @@ func MinDecimal(x, y *p.Decimal) (max *p.Decimal) {
 //
 // DecimalEqual returns true if decimal x is equal to decimal y.
 func DecimalEqual(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, x, y)
-	IsThreshold := Difference.IsZero()
-
-	if IsThreshold == true {
-		Result = true
-	} else {
-		Result = false
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, x, y)
+    IsThreshold := Difference.IsZero()
+    
+    if IsThreshold == true {
+        Result = true
+    } else {
+        Result = false
+    }
+    
+    return Result
 }
 
 // ================================================
@@ -252,19 +253,19 @@ func DecimalEqual(x, y *p.Decimal) bool {
 // DecimalNotEqual returns true if decimal x is not equal to decimal y.
 // Only works with valid Decimal type numbers.
 func DecimalNotEqual(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, x, y)
-	IsThreshold := Difference.IsZero()
-
-	if IsThreshold == true {
-		Result = false
-	} else {
-		Result = true
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, x, y)
+    IsThreshold := Difference.IsZero()
+    
+    if IsThreshold == true {
+        Result = false
+    } else {
+        Result = true
+    }
+    
+    return Result
 }
 
 // ================================================
@@ -275,19 +276,19 @@ func DecimalNotEqual(x, y *p.Decimal) bool {
 // Only works with valid Decimal type numbers.
 // x equals y would return false as in this case x isnt less than y
 func DecimalLessThan(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, x, y)
-	//IsThreshold := Difference.IsZero()
-
-	if Difference.Negative == true {
-		Result = true
-	} else {
-		Result = false
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, x, y)
+    //IsThreshold := Difference.IsZero()
+    
+    if Difference.Negative == true {
+        Result = true
+    } else {
+        Result = false
+    }
+    
+    return Result
 }
 
 // ================================================
@@ -298,19 +299,19 @@ func DecimalLessThan(x, y *p.Decimal) bool {
 // x is less than decimal y, or if they are equal.
 // Only works with valid Decimal type numbers.
 func DecimalLessThanOrEqual(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, x, y)
-	IsThreshold := Difference.IsZero()
-
-	if Difference.Negative == true || IsThreshold == true {
-		Result = true
-	} else {
-		Result = false
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, x, y)
+    IsThreshold := Difference.IsZero()
+    
+    if Difference.Negative == true || IsThreshold == true {
+        Result = true
+    } else {
+        Result = false
+    }
+    
+    return Result
 }
 
 // ================================================
@@ -321,19 +322,19 @@ func DecimalLessThanOrEqual(x, y *p.Decimal) bool {
 // Only works with valid Decimal type numbers.
 // x equals y would return false as in this case x isn't less than y
 func DecimalGreaterThan(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, y, x)
-	//IsThreshold := Difference.IsZero()
-
-	if Difference.Negative == true {
-		Result = true
-	} else {
-		Result = false
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, y, x)
+    //IsThreshold := Difference.IsZero()
+    
+    if Difference.Negative == true {
+        Result = true
+    } else {
+        Result = false
+    }
+    
+    return Result
 }
 
 // ================================================
@@ -344,19 +345,19 @@ func DecimalGreaterThan(x, y *p.Decimal) bool {
 // x is greater than decimal y, or if they are equal.
 // Only works with valid Decimal type numbers.
 func DecimalGreaterThanOrEqual(x, y *p.Decimal) bool {
-	var Result bool
-	ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
-
-	Difference := SUBx(ComparisonContextPrecision, y, x)
-	IsThreshold := Difference.IsZero()
-
-	if Difference.Negative == true || IsThreshold == true {
-		Result = true
-	} else {
-		Result = false
-	}
-
-	return Result
+    var Result bool
+    ComparisonContextPrecision := SummedMaxLengthPlusOne(x, y)
+    
+    Difference := SUBx(ComparisonContextPrecision, y, x)
+    IsThreshold := Difference.IsZero()
+    
+    if Difference.Negative == true || IsThreshold == true {
+        Result = true
+    } else {
+        Result = false
+    }
+    
+    return Result
 }
 
 // ================================================================================================
@@ -375,10 +376,10 @@ func DecimalGreaterThanOrEqual(x, y *p.Decimal) bool {
 //
 // ADDx adds two decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func ADDx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Add(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Add(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -387,9 +388,9 @@ func ADDx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal 
 //
 // ADDs adds two decimals within CryptoplasmPrecisionContext Context
 func ADDs(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	_, _ = c.Add(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    _, _ = c.Add(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -400,18 +401,18 @@ func ADDs(member1, member2 *p.Decimal) *p.Decimal {
 // The Precision has "DecimalPrecision" decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to "DecimalPrecision" decimals.
 func ADD(DecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	DNBDP := SummedMaxLengthPlusOne(member1, member2) //DigitNumberBasedDecimalPrecision
-	//Observation
-	// As "SummedMaxLengthPlusOne" returns a uint32 variable (maximum of 4.294.967.295)
-	// TotalDecimalPrecision will overflow uint32 if adding the "DecimalPrecision" on top of DNBDP because
-	// it (TotalDecimalPrecision) would get bigger than 4.294.967.295.
-	// However, this isn't expected to happen, which is why no check or error detection is implemented.
-	TotalDecimalPrecision := DNBDP + DecimalPrecision
-
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Add(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    DNBDP := SummedMaxLengthPlusOne(member1, member2) //DigitNumberBasedDecimalPrecision
+    //Observation
+    // As "SummedMaxLengthPlusOne" returns a uint32 variable (maximum of 4.294.967.295)
+    // TotalDecimalPrecision will overflow uint32 if adding the "DecimalPrecision" on top of DNBDP because
+    // it (TotalDecimalPrecision) would get bigger than 4.294.967.295.
+    // However, this isn't expected to happen, which is why no check or error detection is implemented.
+    TotalDecimalPrecision := DNBDP + DecimalPrecision
+    
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Add(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -422,7 +423,7 @@ func ADD(DecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
 // The Precision has 70 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 70 decimals.
 func ADDxs(member1, member2 *p.Decimal) *p.Decimal {
-	return ADD(StdMathPrecision, member1, member2)
+    return ADD(StdMathPrecision, member1, member2)
 }
 
 // ================================================
@@ -433,7 +434,7 @@ func ADDxs(member1, member2 *p.Decimal) *p.Decimal {
 // The Precision has 100 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 100 decimals.
 func ADDxc(member1, member2 *p.Decimal) *p.Decimal {
-	return ADD(MaxMathPrecision, member1, member2)
+    return ADD(MaxMathPrecision, member1, member2)
 }
 
 // ================================================
@@ -442,16 +443,16 @@ func ADDxc(member1, member2 *p.Decimal) *p.Decimal {
 //
 // SUMx adds multiple decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func SUMx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	for _, item := range rest {
-		_, _ = cc.Add(restsum, restsum, item)
-	}
-	_, _ = cc.Add(sum, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    for _, item := range rest {
+        _, _ = cc.Add(restsum, restsum, item)
+    }
+    _, _ = cc.Add(sum, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -460,16 +461,16 @@ func SUMx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p
 //
 // SUMs adds multiple decimals within CryptoplasmPrecisionContext Context
 func SUMs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-
-	for _, item := range rest {
-		_, _ = c.Add(restsum, restsum, item)
-	}
-	_, _ = c.Add(sum, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    
+    for _, item := range rest {
+        _, _ = c.Add(restsum, restsum, item)
+    }
+    _, _ = c.Add(sum, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -480,15 +481,15 @@ func SUMs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // The Precision has "DecimalPrecision" decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to "DecimalPrecision" decimals.
 func SUM(DecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-	for _, item := range rest {
-		restsum = ADD(DecimalPrecision, restsum, item)
-	}
-	sum = ADD(DecimalPrecision, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    for _, item := range rest {
+        restsum = ADD(DecimalPrecision, restsum, item)
+    }
+    sum = ADD(DecimalPrecision, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -499,7 +500,7 @@ func SUM(DecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decim
 // The Precision has 50 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 70 decimals.
 func SUMxs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	return SUM(StdMathPrecision, first, rest...)
+    return SUM(StdMathPrecision, first, rest...)
 }
 
 // ================================================
@@ -510,7 +511,7 @@ func SUMxs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // The Precision has 100 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 100 decimals.
 func SUMxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	return SUM(MaxMathPrecision, first, rest...)
+    return SUM(MaxMathPrecision, first, rest...)
 }
 
 // ================================================================================================
@@ -521,10 +522,10 @@ func SUMxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 //
 // SUBx subtract two decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func SUBx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Sub(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Sub(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -533,9 +534,9 @@ func SUBx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal 
 //
 // SUBs subtract two decimals within CryptoplasmPrecisionContext Context
 func SUBs(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	_, _ = c.Sub(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    _, _ = c.Sub(result, member1, member2)
+    return result
 }
 
 //
@@ -548,18 +549,18 @@ func SUBs(member1, member2 *p.Decimal) *p.Decimal {
 // The Precision scales with the number size, but is limited to "DecimalPrecision" decimals.
 
 func SUB(DecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	DNBDP := SummedMaxLengthPlusOne(member1, member2) //DigitNumberBasedDecimalPrecision
-	//Observation
-	// As "SummedMaxLengthPlusOne" returns a uint32 variable (maximum of 4.294.967.295)
-	// TotalDecimalPrecision will overflow uint32 if adding the "DecimalPrecision" on top of DNBDP because
-	// it (TotalDecimalPrecision) would get bigger than 4.294.967.295.
-	// However, this isn't expected to happen, which is why no check or error detection is implemented.
-	TotalDecimalPrecision := DNBDP + DecimalPrecision
-
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Sub(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    DNBDP := SummedMaxLengthPlusOne(member1, member2) //DigitNumberBasedDecimalPrecision
+    //Observation
+    // As "SummedMaxLengthPlusOne" returns a uint32 variable (maximum of 4.294.967.295)
+    // TotalDecimalPrecision will overflow uint32 if adding the "DecimalPrecision" on top of DNBDP because
+    // it (TotalDecimalPrecision) would get bigger than 4.294.967.295.
+    // However, this isn't expected to happen, which is why no check or error detection is implemented.
+    TotalDecimalPrecision := DNBDP + DecimalPrecision
+    
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Sub(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -570,7 +571,7 @@ func SUB(DecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
 // The Precision has 50 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 70 decimals.
 func SUBxs(member1, member2 *p.Decimal) *p.Decimal {
-	return SUB(StdMathPrecision, member1, member2)
+    return SUB(StdMathPrecision, member1, member2)
 }
 
 // ================================================
@@ -581,7 +582,7 @@ func SUBxs(member1, member2 *p.Decimal) *p.Decimal {
 // The Precision has 150 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 100 decimals.
 func SUBxc(member1, member2 *p.Decimal) *p.Decimal {
-	return SUB(MaxMathPrecision, member1, member2)
+    return SUB(MaxMathPrecision, member1, member2)
 }
 
 // ================================================
@@ -590,16 +591,16 @@ func SUBxc(member1, member2 *p.Decimal) *p.Decimal {
 //
 // DIFx subtracts multiple decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func DIFx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	for _, item := range rest {
-		_, _ = cc.Add(restsum, restsum, item)
-	}
-	_, _ = cc.Sub(sum, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    for _, item := range rest {
+        _, _ = cc.Add(restsum, restsum, item)
+    }
+    _, _ = cc.Sub(sum, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -608,16 +609,16 @@ func DIFx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p
 //
 // DIFs subtracts multiple decimals within CryptoplasmPrecisionContext Context
 func DIFs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-
-	for _, item := range rest {
-		_, _ = c.Add(restsum, restsum, item)
-	}
-	_, _ = c.Sub(sum, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    
+    for _, item := range rest {
+        _, _ = c.Add(restsum, restsum, item)
+    }
+    _, _ = c.Sub(sum, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -628,15 +629,15 @@ func DIFs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // The Precision has "DecimalPrecision" decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to "DecimalPrecision" decimals.
 func DIF(DecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		sum     = new(p.Decimal)
-		restsum = p.NFI(0)
-	)
-	for _, item := range rest {
-		restsum = ADD(DecimalPrecision, restsum, item)
-	}
-	sum = SUB(DecimalPrecision, first, restsum)
-	return sum
+    var (
+        sum     = new(p.Decimal)
+        restsum = p.NFI(0)
+    )
+    for _, item := range rest {
+        restsum = ADD(DecimalPrecision, restsum, item)
+    }
+    sum = SUB(DecimalPrecision, first, restsum)
+    return sum
 }
 
 // ================================================
@@ -647,7 +648,7 @@ func DIF(DecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decim
 // The Precision has 50 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 70 decimals.
 func DIFxs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	return DIF(StdMathPrecision, first, rest...)
+    return DIF(StdMathPrecision, first, rest...)
 }
 
 // ================================================
@@ -658,7 +659,7 @@ func DIFxs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // The Precision has 150 decimal Precision plus elastic integer Precision.
 // The Precision scales with the number size, but is limited to 100 decimals.
 func DIFxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	return DIF(MaxMathPrecision, first, rest...)
+    return DIF(MaxMathPrecision, first, rest...)
 }
 
 // ================================================================================================
@@ -670,10 +671,10 @@ func DIFxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // MULx multiplies two decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 // Total number of digits is equal to the Precision specified in the TotalDecimalPrecision variable
 func MULx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Mul(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Mul(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -683,9 +684,9 @@ func MULx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal 
 // MULs multiplies two decimals within LOCPrecisionContext Context
 // Total number of digits is equal to the Precision specified in LOCPrecisionContext
 func MULs(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	_, _ = c.Mul(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    _, _ = c.Mul(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -698,38 +699,38 @@ func MULs(member1, member2 *p.Decimal) *p.Decimal {
 // Any limits means only a theoretical hard limit of 4.294.967.195 digits, 100 units less than uint32.
 // This is however expected never to be achieved.
 func MULxc(member1, member2 *p.Decimal) *p.Decimal {
-	var (
-		result           = new(p.Decimal)
-		DecimalPrecision uint32
-	)
-
-	IntegerDigitsMember1 := Count4Coma(member1)  //int64
-	IntegerDigitsMember2 := Count4Coma(member2)  //int64
-	DecimalDigitsMember1 := 0 - member1.Exponent //int32
-	DecimalDigitsMember2 := 0 - member2.Exponent //int32
-
-	IntegerSumInt64 := IntegerDigitsMember1 + IntegerDigitsMember2 //int64 9.223.372.036.854.775.807
-	DecimalSumInt32 := DecimalDigitsMember1 + DecimalDigitsMember2 //int32 2.147.483.647
-
-	IntegerSumUint32 := uint32(IntegerSumInt64) // from 9.223.372.036.854.775.807 to max 4.294.967.295
-	DecimalSumUint32 := uint32(DecimalSumInt32) // from 2.147.483.647 to max 4.294.967.295
-
-	//Max IntegerSum can be 4.294.967.295
-	//Max DecimalSum is limited to 100.
-	//As these are added to give the total precision, Max IntegerSum can be as high as 4.294.967.195
-
-	if DecimalSumUint32 < MaxMathPrecision {
-		DecimalPrecision = DecimalSumUint32
-	} else {
-		DecimalPrecision = MaxMathPrecision
-	}
-	MultiplicationPrecision := IntegerSumUint32 + DecimalPrecision
-
-	cc := c.WithPrecision(MultiplicationPrecision)
-	_, _ = cc.Mul(result, member1, member2)
-
-	result = TruncateCustom(result, DecimalPrecision)
-	return result
+    var (
+        result           = new(p.Decimal)
+        DecimalPrecision uint32
+    )
+    
+    IntegerDigitsMember1 := Count4Coma(member1)  //int64
+    IntegerDigitsMember2 := Count4Coma(member2)  //int64
+    DecimalDigitsMember1 := 0 - member1.Exponent //int32
+    DecimalDigitsMember2 := 0 - member2.Exponent //int32
+    
+    IntegerSumInt64 := IntegerDigitsMember1 + IntegerDigitsMember2 //int64 9.223.372.036.854.775.807
+    DecimalSumInt32 := DecimalDigitsMember1 + DecimalDigitsMember2 //int32 2.147.483.647
+    
+    IntegerSumUint32 := uint32(IntegerSumInt64) // from 9.223.372.036.854.775.807 to max 4.294.967.295
+    DecimalSumUint32 := uint32(DecimalSumInt32) // from 2.147.483.647 to max 4.294.967.295
+    
+    //Max IntegerSum can be 4.294.967.295
+    //Max DecimalSum is limited to 100.
+    //As these are added to give the total precision, Max IntegerSum can be as high as 4.294.967.195
+    
+    if DecimalSumUint32 < MaxMathPrecision {
+        DecimalPrecision = DecimalSumUint32
+    } else {
+        DecimalPrecision = MaxMathPrecision
+    }
+    MultiplicationPrecision := IntegerSumUint32 + DecimalPrecision
+    
+    cc := c.WithPrecision(MultiplicationPrecision)
+    _, _ = cc.Mul(result, member1, member2)
+    
+    result = TruncateCustom(result, DecimalPrecision)
+    return result
 }
 
 // ================================================
@@ -738,17 +739,17 @@ func MULxc(member1, member2 *p.Decimal) *p.Decimal {
 //
 // PRDx multiplies multiple decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func PRDx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		product     = new(p.Decimal)
-		restproduct = p.NFI(1)
-	)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	for _, item := range rest {
-		_, _ = cc.Mul(restproduct, restproduct, item)
-	}
-	_, _ = cc.Mul(product, first, restproduct)
-
-	return product
+    var (
+        product     = new(p.Decimal)
+        restproduct = p.NFI(1)
+    )
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    for _, item := range rest {
+        _, _ = cc.Mul(restproduct, restproduct, item)
+    }
+    _, _ = cc.Mul(product, first, restproduct)
+    
+    return product
 }
 
 // ================================================
@@ -757,17 +758,17 @@ func PRDx(TotalDecimalPrecision uint32, first *p.Decimal, rest ...*p.Decimal) *p
 //
 // PRDs multiplies multiple decimals within CryptoplasmPrecisionContext Context
 func PRDs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		product     = new(p.Decimal)
-		restproduct = p.NFI(1)
-	)
-
-	for _, item := range rest {
-		_, _ = c.Mul(restproduct, restproduct, item)
-	}
-	_, _ = c.Mul(product, first, restproduct)
-
-	return product
+    var (
+        product     = new(p.Decimal)
+        restproduct = p.NFI(1)
+    )
+    
+    for _, item := range rest {
+        _, _ = c.Mul(restproduct, restproduct, item)
+    }
+    _, _ = c.Mul(product, first, restproduct)
+    
+    return product
 }
 
 // ================================================
@@ -779,18 +780,18 @@ func PRDs(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 // Any limits means only a theoretical hard limit of 4.294.967.195 digits, 100 units less than uint32.
 // This is however expected never to happen.
 func PRDxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
-	var (
-		product     = new(p.Decimal)
-		restproduct = p.NFI(1)
-	)
-
-	for _, item := range rest {
-		restproduct = MULxc(restproduct, item)
-	}
-	product = MULxc(first, restproduct)
-	_, _ = c.Mul(product, first, restproduct)
-
-	return product
+    var (
+        product     = new(p.Decimal)
+        restproduct = p.NFI(1)
+    )
+    
+    for _, item := range rest {
+        restproduct = MULxc(restproduct, item)
+    }
+    product = MULxc(first, restproduct)
+    _, _ = c.Mul(product, first, restproduct)
+    
+    return product
 }
 
 // ================================================
@@ -799,10 +800,10 @@ func PRDxc(first *p.Decimal, rest ...*p.Decimal) *p.Decimal {
 //
 // POWx computes x ** y within a custom Precision modified CryptoplasmPrecisionContext Context
 func POWx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Pow(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Pow(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -811,10 +812,10 @@ func POWx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal 
 //
 // POWs computes x ** y within CryptoplasmPrecisionContext Context
 func POWs(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-
-	_, _ = c.Pow(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    
+    _, _ = c.Pow(result, member1, member2)
+    return result
 }
 
 //
@@ -830,21 +831,21 @@ func POWs(member1, member2 *p.Decimal) *p.Decimal {
 // Number of digit of a^b is D=1+b*log(10,a)
 
 func POWxcs(DecimalNumber uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	var Logarithm = new(p.Decimal)
-
-	//Getting the number of Digits the power would have
-	_, _ = c.Log10(Logarithm, member1)
-	Digits := ADDxc(p.NFI(1), MULxc(member2, Logarithm))
-	DigitsR := TruncateCustom(Digits, 0)
-	DigitsRI := uint32(p.INT64(DigitsR))
-
-	TotalPowerPrecision := DigitsRI + DecimalNumber
-
-	cc := c.WithPrecision(TotalPowerPrecision)
-	_, _ = cc.Pow(result, member1, member2)
-
-	return result
+    var result = new(p.Decimal)
+    var Logarithm = new(p.Decimal)
+    
+    //Getting the number of Digits the power would have
+    _, _ = c.Log10(Logarithm, member1)
+    Digits := ADDxc(p.NFI(1), MULxc(member2, Logarithm))
+    DigitsR := TruncateCustom(Digits, 0)
+    DigitsRI := uint32(p.INT64(DigitsR))
+    
+    TotalPowerPrecision := DigitsRI + DecimalNumber
+    
+    cc := c.WithPrecision(TotalPowerPrecision)
+    _, _ = cc.Pow(result, member1, member2)
+    
+    return result
 }
 
 // ================================================
@@ -854,10 +855,10 @@ func POWxcs(DecimalNumber uint32, member1, member2 *p.Decimal) *p.Decimal {
 // POWxc computes x ** y within an elastically modified Precision LOCPrecisionContext Context
 // Same as POWxcs, the custom Decimal limit is set to LOCMaxMathPrecision (150)
 func POWxc(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	result = POWxcs(MaxMathPrecision, member1, member2)
-
-	return result
+    var result = new(p.Decimal)
+    result = POWxcs(MaxMathPrecision, member1, member2)
+    
+    return result
 }
 
 // ================================================
@@ -867,38 +868,38 @@ func POWxc(member1, member2 *p.Decimal) *p.Decimal {
 // POWxc computes x ** y within an elastically modified Precision LOCPrecisionContext Context
 // Logarithm returns the logarithm from "number" in base "base".
 func Logarithm(base, number *p.Decimal) *p.Decimal {
-	var (
-		LogBase   = new(p.Decimal)
-		LogNumber = new(p.Decimal)
-	)
-	//For LogBase and LogNumber Context precision
-	//2+24 Context precision is enough, for base and number below e^100
-	//if such were the case, a 3+24 (CryptoplasmCurrencyPrecision)
-	//precision would be required. However e^100 has an Integer of 44 digits, namely
-	//26.881.171.418.161.354.484.126.255.515.800.135.873.611.118
-	//So one would have to need to compute the OverSend for a CP amount
-	//bigger than this number to have the need to use a 3+24 context precision,
-	//for computing the first logarithm below. Therefore 2+24 context precision
-	//for both logarithms should be enough
-	//27 Context Precision would be enough to compute the needed logarithm
-	//for many more coins that could ever be minted until the End of the Universe.
-	//if the Cryptoplasm emission would be repeated for every subsequent 524.596.891 Blocks (1 ERA)
-	//1(ERA ~ 107 to 110 Trillion CP).
-
-	//As the resulted LNs have the same number of digits for their integer part
-	//a context Precision of 1+24 would always be enough, as the division would always
-	//look like 1,.....
-
-	//+3 is used, so such a high amount of coins to compute the OverSend for will also
-	//work, and, as has been tested, indeed the code allows it to work.
-
-	NumberDigits := number.NumDigits()
-	IP := 2*CurrencyPrecision + uint32(NumberDigits)
-	cc := c.WithPrecision(IP)
-	_, _ = cc.Ln(LogBase, base)
-	_, _ = cc.Ln(LogNumber, number)
-	CustomLog := DIVx(IP, LogNumber, LogBase)
-	return CustomLog
+    var (
+        LogBase   = new(p.Decimal)
+        LogNumber = new(p.Decimal)
+    )
+    //For LogBase and LogNumber Context precision
+    //2+24 Context precision is enough, for base and number below e^100
+    //if such were the case, a 3+24 (CryptoplasmCurrencyPrecision)
+    //precision would be required. However e^100 has an Integer of 44 digits, namely
+    //26.881.171.418.161.354.484.126.255.515.800.135.873.611.118
+    //So one would have to need to compute the OverSend for a CP amount
+    //bigger than this number to have the need to use a 3+24 context precision,
+    //for computing the first logarithm below. Therefore 2+24 context precision
+    //for both logarithms should be enough
+    //27 Context Precision would be enough to compute the needed logarithm
+    //for many more coins that could ever be minted until the End of the Universe.
+    //if the Cryptoplasm emission would be repeated for every subsequent 524.596.891 Blocks (1 ERA)
+    //1(ERA ~ 107 to 110 Trillion CP).
+    
+    //As the resulted LNs have the same number of digits for their integer part
+    //a context Precision of 1+24 would always be enough, as the division would always
+    //look like 1,.....
+    
+    //+3 is used, so such a high amount of coins to compute the OverSend for will also
+    //work, and, as has been tested, indeed the code allows it to work.
+    
+    NumberDigits := number.NumDigits()
+    IP := 2*CurrencyPrecision + uint32(NumberDigits)
+    cc := c.WithPrecision(IP)
+    _, _ = cc.Ln(LogBase, base)
+    _, _ = cc.Ln(LogNumber, number)
+    CustomLog := DIVx(IP, LogNumber, LogBase)
+    return CustomLog
 }
 
 // ================================================
@@ -907,10 +908,10 @@ func Logarithm(base, number *p.Decimal) *p.Decimal {
 //
 // DIVx divides two decimals within a custom Precision modified CryptoplasmPrecisionContext Context
 func DIVx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	cc := c.WithPrecision(TotalDecimalPrecision)
-	_, _ = cc.Quo(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    cc := c.WithPrecision(TotalDecimalPrecision)
+    _, _ = cc.Quo(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -919,9 +920,9 @@ func DIVx(TotalDecimalPrecision uint32, member1, member2 *p.Decimal) *p.Decimal 
 //
 // DIVs divides two decimals within CryptoplasmPrecisionContext Context
 func DIVs(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	_, _ = c.Quo(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    _, _ = c.Quo(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -930,90 +931,90 @@ func DIVs(member1, member2 *p.Decimal) *p.Decimal {
 //
 // DIVxc divides 2 numbers with elastic integer precision and 100 max decimal precision
 func DIVxc(member1, member2 *p.Decimal) *p.Decimal {
-	var (
-		result           = new(p.Decimal)
-		IntegerPrecision uint32
-	)
-
-	IntegerDigitsMember1 := Count4Coma(member1) //int64		//Number of integer digits
-	IntegerDigitsMember2 := Count4Coma(member2) //int64		//Number of integer digits
-
-	DecimalDigitsMember1 := 0 - member1.Exponent //int32		//Number of decimals digits
-	DecimalDigitsMember2 := 0 - member2.Exponent //int32		//Number of decimals digits
-
-	NumberDigitsMember1 := member1.NumDigits() //Total Number of digits
-	NumberDigitsMember2 := member2.NumDigits() //Total Number of digits
-
-	IntegerMember1 := RemoveDecimals(member1) //Integer Value without decimals
-	IntegerMember2 := RemoveDecimals(member2) //Integer Value without decimals
-
-	if DecimalGreaterThan(IntegerMember1, p.NFI(0)) == true && DecimalGreaterThan(IntegerMember2, p.NFI(0)) {
-		//Case 1 Integer Part is similar
-		//fmt.Println("Case1")
-		if DecimalEqual(IntegerMember1, IntegerMember2) == true {
-			//fmt.Println("Case1.1")
-			if DecimalGreaterThanOrEqual(member1, member2) == true {
-				//fmt.Println("Case1.1.1")
-				IntegerPrecision = 1
-			} else {
-				//fmt.Println("Case1.1.2")
-				IntegerPrecision = 0
-			}
-		} else if DecimalGreaterThan(IntegerMember1, IntegerMember2) == true {
-			//fmt.Println("Case1.2")
-			if IntegerDigitsMember1 == IntegerDigitsMember2 {
-				//fmt.Println("Case1.2.1")
-				IntegerPrecision = 1
-			} else if IntegerDigitsMember1 > IntegerDigitsMember2 {
-				//fmt.Println("Case1.2.2")
-				IntegerPrecision = uint32(IntegerDigitsMember1) - uint32(IntegerDigitsMember2) + 1
-				//fmt.Println("IntegerPrecision is",IntegerPrecision)
-			}
-		} else {
-			//fmt.Println("Case1.3")
-			IntegerPrecision = 0
-		}
-	} else if DecimalGreaterThan(IntegerMember1, p.NFI(0)) == true && DecimalEqual(IntegerMember2, p.NFI(0)) {
-		//Case 2 Integer Part of member2 is zero
-		fmt.Println("Case2")
-		if int32(NumberDigitsMember2) == DecimalDigitsMember2 {
-			//fmt.Println("Case2.1")
-			IntegerPrecision = uint32(IntegerDigitsMember1) + 1
-		} else {
-			//fmt.Println("Case2.2")
-			Zeros := DecimalDigitsMember2 - int32(NumberDigitsMember2)
-			IntegerPrecision = uint32(IntegerDigitsMember1) + 1 + uint32(Zeros)
-		}
-	} else if DecimalGreaterThan(IntegerMember2, p.NFI(0)) == true && DecimalEqual(IntegerMember1, p.NFI(0)) {
-		//Case 3 Integer Part of member1 is zero
-		//fmt.Println("Case3")
-		IntegerPrecision = 0
-	} else if DecimalEqual(IntegerMember1, p.NFI(0)) && DecimalEqual(IntegerMember2, p.NFI(0)) {
-		//Case 4 both Integer Parts are zero
-		//fmt.Println("Case4")
-		Zeros1 := DecimalDigitsMember1 - int32(NumberDigitsMember1)
-		Zeros2 := DecimalDigitsMember2 - int32(NumberDigitsMember2)
-		if Zeros1 < Zeros2 {
-			//fmt.Println("Case4.1")
-			IntegerPrecision = uint32(Zeros2-Zeros1) + 1
-		} else if Zeros1 > Zeros2 {
-			//fmt.Println("Case4.2")
-			IntegerPrecision = 0
-		} else if Zeros1 == Zeros2 {
-			//fmt.Println("Case4.3")
-			if DecimalLessThan(member1, member2) == true {
-				//fmt.Println("Case4.3.1")
-				IntegerPrecision = 0
-			} else {
-				//fmt.Println("Case4.3.2")
-				IntegerPrecision = 1
-			}
-		}
-	}
-
-	TotalDivisionPrecision := IntegerPrecision + MaxMathPrecision
-	result = DIVx(TotalDivisionPrecision, member1, member2)
-	return result
+    var (
+        result           = new(p.Decimal)
+        IntegerPrecision uint32
+    )
+    
+    IntegerDigitsMember1 := Count4Coma(member1) //int64		//Number of integer digits
+    IntegerDigitsMember2 := Count4Coma(member2) //int64		//Number of integer digits
+    
+    DecimalDigitsMember1 := 0 - member1.Exponent //int32		//Number of decimals digits
+    DecimalDigitsMember2 := 0 - member2.Exponent //int32		//Number of decimals digits
+    
+    NumberDigitsMember1 := member1.NumDigits() //Total Number of digits
+    NumberDigitsMember2 := member2.NumDigits() //Total Number of digits
+    
+    IntegerMember1 := RemoveDecimals(member1) //Integer Value without decimals
+    IntegerMember2 := RemoveDecimals(member2) //Integer Value without decimals
+    
+    if DecimalGreaterThan(IntegerMember1, p.NFI(0)) == true && DecimalGreaterThan(IntegerMember2, p.NFI(0)) {
+        //Case 1 Integer Part is similar
+        //fmt.Println("Case1")
+        if DecimalEqual(IntegerMember1, IntegerMember2) == true {
+            //fmt.Println("Case1.1")
+            if DecimalGreaterThanOrEqual(member1, member2) == true {
+                //fmt.Println("Case1.1.1")
+                IntegerPrecision = 1
+            } else {
+                //fmt.Println("Case1.1.2")
+                IntegerPrecision = 0
+            }
+        } else if DecimalGreaterThan(IntegerMember1, IntegerMember2) == true {
+            //fmt.Println("Case1.2")
+            if IntegerDigitsMember1 == IntegerDigitsMember2 {
+                //fmt.Println("Case1.2.1")
+                IntegerPrecision = 1
+            } else if IntegerDigitsMember1 > IntegerDigitsMember2 {
+                //fmt.Println("Case1.2.2")
+                IntegerPrecision = uint32(IntegerDigitsMember1) - uint32(IntegerDigitsMember2) + 1
+                //fmt.Println("IntegerPrecision is",IntegerPrecision)
+            }
+        } else {
+            //fmt.Println("Case1.3")
+            IntegerPrecision = 0
+        }
+    } else if DecimalGreaterThan(IntegerMember1, p.NFI(0)) == true && DecimalEqual(IntegerMember2, p.NFI(0)) {
+        //Case 2 Integer Part of member2 is zero
+        fmt.Println("Case2")
+        if int32(NumberDigitsMember2) == DecimalDigitsMember2 {
+            //fmt.Println("Case2.1")
+            IntegerPrecision = uint32(IntegerDigitsMember1) + 1
+        } else {
+            //fmt.Println("Case2.2")
+            Zeros := DecimalDigitsMember2 - int32(NumberDigitsMember2)
+            IntegerPrecision = uint32(IntegerDigitsMember1) + 1 + uint32(Zeros)
+        }
+    } else if DecimalGreaterThan(IntegerMember2, p.NFI(0)) == true && DecimalEqual(IntegerMember1, p.NFI(0)) {
+        //Case 3 Integer Part of member1 is zero
+        //fmt.Println("Case3")
+        IntegerPrecision = 0
+    } else if DecimalEqual(IntegerMember1, p.NFI(0)) && DecimalEqual(IntegerMember2, p.NFI(0)) {
+        //Case 4 both Integer Parts are zero
+        //fmt.Println("Case4")
+        Zeros1 := DecimalDigitsMember1 - int32(NumberDigitsMember1)
+        Zeros2 := DecimalDigitsMember2 - int32(NumberDigitsMember2)
+        if Zeros1 < Zeros2 {
+            //fmt.Println("Case4.1")
+            IntegerPrecision = uint32(Zeros2-Zeros1) + 1
+        } else if Zeros1 > Zeros2 {
+            //fmt.Println("Case4.2")
+            IntegerPrecision = 0
+        } else if Zeros1 == Zeros2 {
+            //fmt.Println("Case4.3")
+            if DecimalLessThan(member1, member2) == true {
+                //fmt.Println("Case4.3.1")
+                IntegerPrecision = 0
+            } else {
+                //fmt.Println("Case4.3.2")
+                IntegerPrecision = 1
+            }
+        }
+    }
+    
+    TotalDivisionPrecision := IntegerPrecision + MaxMathPrecision
+    result = DIVx(TotalDivisionPrecision, member1, member2)
+    return result
 }
 
 // ================================================
@@ -1024,11 +1025,11 @@ func DIVxc(member1, member2 *p.Decimal) *p.Decimal {
 // It is equal to x // y
 // Returned Value is also of decimal Type
 func DivInt(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
-	cc := c.WithPrecision(DCP)
-	_, _ = cc.QuoInteger(result, member1, member2)
-	return result
+    var result = new(p.Decimal)
+    DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
+    cc := c.WithPrecision(DCP)
+    _, _ = cc.QuoInteger(result, member1, member2)
+    return result
 }
 
 // ================================================
@@ -1039,11 +1040,11 @@ func DivInt(member1, member2 *p.Decimal) *p.Decimal {
 // It is equal to x % y
 // Returned Value is also of decimal Type
 func DivMod(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
-	divresult := TruncateCustom(DivInt(member1, member2), 0)
-	result = SUBx(DCP, member1, MULx(DCP, member2, divresult))
-	return result
+    var result = new(p.Decimal)
+    DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
+    divresult := TruncateCustom(DivInt(member1, member2), 0)
+    result = SUBx(DCP, member1, MULx(DCP, member2, divresult))
+    return result
 }
 
 // ================================================
@@ -1058,10 +1059,10 @@ func DivMod(member1, member2 *p.Decimal) *p.Decimal {
 //
 // TwoMean returns the mean of two decimals
 func TwoMean(member1, member2 *p.Decimal) *p.Decimal {
-	var result = new(p.Decimal)
-	DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
-	result = DIVx(DCP, ADDxc(member2, member2), p.NFI(2))
-	return result
+    var result = new(p.Decimal)
+    DCP := SummedMaxLengthPlusOne(member1, member2) //DivisionContextPrecision
+    result = DIVx(DCP, ADDxc(member2, member2), p.NFI(2))
+    return result
 }
 
 // ================================================
@@ -1076,15 +1077,15 @@ func TwoMean(member1, member2 *p.Decimal) *p.Decimal {
 //
 // TruncateCustom truncates the decimal to the specified precision number
 func TruncateCustom(Number *p.Decimal, DecimalPrecision uint32) *p.Decimal {
-	var result = new(p.Decimal)
-
-	NumberDigits := Count4Coma(Number)
-	TruncatingContextPrecision := uint32(NumberDigits) + DecimalPrecision
-	cc := c.WithPrecision(TruncatingContextPrecision)
-
-	CSP := 0 - int32(DecimalPrecision)
-	_, _ = cc.Quantize(result, Number, CSP)
-	return result
+    var result = new(p.Decimal)
+    
+    NumberDigits := Count4Coma(Number)
+    TruncatingContextPrecision := uint32(NumberDigits) + DecimalPrecision
+    cc := c.WithPrecision(TruncatingContextPrecision)
+    
+    CSP := 0 - int32(DecimalPrecision)
+    _, _ = cc.Quantize(result, Number, CSP)
+    return result
 }
 
 // ================================================
@@ -1094,7 +1095,7 @@ func TruncateCustom(Number *p.Decimal, DecimalPrecision uint32) *p.Decimal {
 // TruncSeed truncates the decimal to XPPrecision
 // XP has a decimal precision of 8 Decimals
 func TruncSeed(SeedNumber *p.Decimal) *p.Decimal {
-	return TruncateCustom(SeedNumber, XPPrecision)
+    return TruncateCustom(SeedNumber, XPPrecision)
 }
 
 // ================================================
@@ -1105,7 +1106,7 @@ func TruncSeed(SeedNumber *p.Decimal) *p.Decimal {
 // Currency Precision is currently set to 18 Decimals
 // It is Context Precision Independent
 func TruncToCurrency(Amount2BecomeCurrency *p.Decimal) *p.Decimal {
-	return TruncateCustom(Amount2BecomeCurrency, CurrencyPrecision)
+    return TruncateCustom(Amount2BecomeCurrency, CurrencyPrecision)
 }
 
 // ================================================
@@ -1116,7 +1117,7 @@ func TruncToCurrency(Amount2BecomeCurrency *p.Decimal) *p.Decimal {
 // Promille has 6 Decimals precision
 // It is Context Precision Independent
 func TruncPercent(Amount2BeTruncated *p.Decimal) *p.Decimal {
-	return TruncateCustom(Amount2BeTruncated, PromillePrecision)
+    return TruncateCustom(Amount2BeTruncated, PromillePrecision)
 }
 
 // ================================================
@@ -1133,12 +1134,12 @@ func TruncPercent(Amount2BeTruncated *p.Decimal) *p.Decimal {
 // SumDL short for SumDecimalList, return the sum of
 // the decimals within the list/slice
 func SumDL(a []*p.Decimal) *p.Decimal {
-	var sum = new(p.Decimal)
-
-	for i := 0; i < len(a); i++ {
-		sum = ADDs(sum, a[i])
-	}
-	return sum
+    var sum = new(p.Decimal)
+    
+    for i := 0; i < len(a); i++ {
+        sum = ADDs(sum, a[i])
+    }
+    return sum
 }
 
 // ================================================
@@ -1148,10 +1149,10 @@ func SumDL(a []*p.Decimal) *p.Decimal {
 // LastDE short for LastDecimalElement, returns the last element
 // in the slice (of Decimals). Equivalent to pythons -1 index
 func LastDE(a []*p.Decimal) *p.Decimal {
-	Length := len(a)
-	LastElementIndex := Length - 1
-	LastElement := a[LastElementIndex]
-	return LastElement
+    Length := len(a)
+    LastElementIndex := Length - 1
+    LastElement := a[LastElementIndex]
+    return LastElement
 }
 
 // ================================================
@@ -1161,8 +1162,8 @@ func LastDE(a []*p.Decimal) *p.Decimal {
 // AppDec creates a new bigger slice from the 2 slices of Decimals used as input
 // therefore, slices must be made of decimals
 func AppDec(w1, w2 []*p.Decimal) []*p.Decimal {
-	w3 := append(w1, w2...)
-	return w3
+    w3 := append(w1, w2...)
+    return w3
 }
 
 // ================================================
@@ -1171,13 +1172,13 @@ func AppDec(w1, w2 []*p.Decimal) []*p.Decimal {
 //
 // Returns the Reverse of the Slice/Lists
 func Reverse(a []*p.Decimal) []*p.Decimal {
-	var Reversed = make([]*p.Decimal, 0)
-	Length := len(a)
-	LastElementIndex := Length - 1
-	for i := LastElementIndex; i >= 0; i-- {
-		Reversed = append(Reversed, a[i])
-	}
-	return Reversed
+    var Reversed = make([]*p.Decimal, 0)
+    Length := len(a)
+    LastElementIndex := Length - 1
+    for i := LastElementIndex; i >= 0; i-- {
+        Reversed = append(Reversed, a[i])
+    }
+    return Reversed
 }
 
 // ================================================
@@ -1187,9 +1188,9 @@ func Reverse(a []*p.Decimal) []*p.Decimal {
 // PrintStringList short for PrintDecimalList, prints the decimals
 // within the given list/slice
 func PrintDecimalList(a []*p.Decimal) {
-	for i := 0; i < len(a); i++ {
-		fmt.Println("Element is,", a[i])
-	}
+    for i := 0; i < len(a); i++ {
+        fmt.Println("Element is,", a[i])
+    }
 }
 
 // ================================================
@@ -1199,24 +1200,24 @@ func PrintDecimalList(a []*p.Decimal) {
 // WriteList writes the strings from the slice to an external file
 // as Name can be used "File.txt" as the output file.
 func WriteList(Name string, List []string) {
-	f, err := os.Create(Name)
-
-	if err != nil {
-		fmt.Println(err)
-		_ = f.Close()
-		return
-	}
-
-	for _, v := range List {
-		_, _ = fmt.Fprintln(f, v)
-	}
-	err = f.Close()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("file written successfully")
-	return
+    f, err := os.Create(Name)
+    
+    if err != nil {
+        fmt.Println(err)
+        _ = f.Close()
+        return
+    }
+    
+    for _, v := range List {
+        _, _ = fmt.Fprintln(f, v)
+    }
+    err = f.Close()
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println("file written successfully")
+    return
 }
 
 // ================================================
@@ -1232,11 +1233,11 @@ func WriteList(Name string, List []string) {
 // RemoveDecimals removes the decimals and leaves the resulted number
 // without them
 func RemoveDecimals(Number *p.Decimal) *p.Decimal {
-	var Whole = new(p.Decimal)
-	NumberDigits := Number.NumDigits()
-	cc := c.WithPrecision(uint32(NumberDigits))
-	_, _ = cc.Floor(Whole, Number)
-	return Whole
+    var Whole = new(p.Decimal)
+    NumberDigits := Number.NumDigits()
+    cc := c.WithPrecision(uint32(NumberDigits))
+    _, _ = cc.Floor(Whole, Number)
+    return Whole
 }
 
 // ================================================
@@ -1245,9 +1246,9 @@ func RemoveDecimals(Number *p.Decimal) *p.Decimal {
 //
 // Count4Coma returns the number of digits before precision
 func Count4Coma(Number *p.Decimal) int64 {
-	Whole := RemoveDecimals(Number)
-	Int64Digits := Whole.NumDigits() //int64, up to 9223372036854775807
-	return Int64Digits
+    Whole := RemoveDecimals(Number)
+    Int64Digits := Whole.NumDigits() //int64, up to 9223372036854775807
+    return Int64Digits
 }
 
 // ================================================
@@ -1257,64 +1258,64 @@ func Count4Coma(Number *p.Decimal) int64 {
 // DTS Converts Decimal to String with "." as Separator
 // Similar to .String() function, but you can choose separator.
 func DTS(Input *p.Decimal) (Output string) {
-	var Zeros string
-
-	//Function makes a rune chain from a text string
-	MakeRuneChain := func(Text string) []rune {
-		Result := []rune(Text)
-		return Result
-	}
-
-	//Function to insert an element (Value to insert) in a slice (in this example runes) at a given position (Index)
-	InsertIntoRuneSlice := func(RuneSlice []rune, Index int, ValueToInsert rune) []rune {
-		if len(RuneSlice) == Index { //nil or empty slice or after the last element
-			return append(RuneSlice, ValueToInsert)
-		}
-		RuneSlice = append(RuneSlice[:Index+1], RuneSlice[Index:]...) //Index < len(RuneSlice)
-		RuneSlice[Index] = ValueToInsert
-		return RuneSlice
-	}
-
-	//Separator that is to be inserted into the string to be created.
-	//The "." Character is used
-	Separator := MakeRuneChain(".")[0]
-	IntegerPart := RemoveDecimals(Input)
-
-	//Creating the Chain of runes representing the Decimal Number
-	Coefficient := Input.Coeff
-	DecimalAsLongText := Coefficient.Text(10)
-	OriginalRuneSlice := MakeRuneChain(DecimalAsLongText)
-
-	//Getting the Position where the Separator must be inserted
-	//Assumes Exponent is lower than Zero, that is, there is precision in the decimal, ie: "8888.12345"
-	//That Example would have a -5 Exponent
-	Exponent := int(Input.Exponent)
-
-	Position := len(OriginalRuneSlice) + Exponent
-
-	if DecimalEqual(IntegerPart, p.NFS("0")) == true && Exponent < 0 {
-		PosExp := 0 - Exponent
-		NumberOfExtraZeroes := PosExp - len(OriginalRuneSlice)
-		if NumberOfExtraZeroes != 0 { //Case 0.00000xxxxx
-			for i := 0; i < NumberOfExtraZeroes; i++ {
-				Zeros = Zeros + "0"
-			}
-			ModifiedDecimalAsLongText := Zeros + DecimalAsLongText
-			ModifiedRuneSlice := MakeRuneChain(ModifiedDecimalAsLongText)
-			S1 := string(InsertIntoRuneSlice(ModifiedRuneSlice, len(ModifiedRuneSlice)+Exponent, Separator))
-			Output = "0" + S1
-		} else { //Case 0.xxxxx
-			S2 := string(InsertIntoRuneSlice(OriginalRuneSlice, Position, Separator))
-			Output = "0" + S2
-		}
-	} else {
-		if Exponent >= 0 { //Case xxxxx
-			Output = DecimalAsLongText
-		} else { //Case xxxxx.xxxxxx
-			Output = string(InsertIntoRuneSlice(OriginalRuneSlice, Position, Separator))
-		}
-	}
-	return
+    var Zeros string
+    
+    //Function makes a rune chain from a text string
+    MakeRuneChain := func(Text string) []rune {
+        Result := []rune(Text)
+        return Result
+    }
+    
+    //Function to insert an element (Value to insert) in a slice (in this example runes) at a given position (Index)
+    InsertIntoRuneSlice := func(RuneSlice []rune, Index int, ValueToInsert rune) []rune {
+        if len(RuneSlice) == Index { //nil or empty slice or after the last element
+            return append(RuneSlice, ValueToInsert)
+        }
+        RuneSlice = append(RuneSlice[:Index+1], RuneSlice[Index:]...) //Index < len(RuneSlice)
+        RuneSlice[Index] = ValueToInsert
+        return RuneSlice
+    }
+    
+    //Separator that is to be inserted into the string to be created.
+    //The "." Character is used
+    Separator := MakeRuneChain(".")[0]
+    IntegerPart := RemoveDecimals(Input)
+    
+    //Creating the Chain of runes representing the Decimal Number
+    Coefficient := Input.Coeff
+    DecimalAsLongText := Coefficient.Text(10)
+    OriginalRuneSlice := MakeRuneChain(DecimalAsLongText)
+    
+    //Getting the Position where the Separator must be inserted
+    //Assumes Exponent is lower than Zero, that is, there is precision in the decimal, ie: "8888.12345"
+    //That Example would have a -5 Exponent
+    Exponent := int(Input.Exponent)
+    
+    Position := len(OriginalRuneSlice) + Exponent
+    
+    if DecimalEqual(IntegerPart, p.NFS("0")) == true && Exponent < 0 {
+        PosExp := 0 - Exponent
+        NumberOfExtraZeroes := PosExp - len(OriginalRuneSlice)
+        if NumberOfExtraZeroes != 0 { //Case 0.00000xxxxx
+            for i := 0; i < NumberOfExtraZeroes; i++ {
+                Zeros = Zeros + "0"
+            }
+            ModifiedDecimalAsLongText := Zeros + DecimalAsLongText
+            ModifiedRuneSlice := MakeRuneChain(ModifiedDecimalAsLongText)
+            S1 := string(InsertIntoRuneSlice(ModifiedRuneSlice, len(ModifiedRuneSlice)+Exponent, Separator))
+            Output = "0" + S1
+        } else { //Case 0.xxxxx
+            S2 := string(InsertIntoRuneSlice(OriginalRuneSlice, Position, Separator))
+            Output = "0" + S2
+        }
+    } else {
+        if Exponent >= 0 { //Case xxxxx
+            Output = DecimalAsLongText
+        } else { //Case xxxxx.xxxxxx
+            Output = string(InsertIntoRuneSlice(OriginalRuneSlice, Position, Separator))
+        }
+    }
+    return
 }
 
 // ================================================
@@ -1331,12 +1332,12 @@ func DTS(Input *p.Decimal) (Output string) {
 //
 // Convert2AU converts a CryptoCurrency amount into Atomic Units
 func Convert2AU(cpAmount *p.Decimal) *p.Decimal {
-	tcpAmount := TruncToCurrency(cpAmount)
-	NumberDigits := Count4Coma(cpAmount)
-	IP := uint32(NumberDigits) + CurrencyPrecision
-	AU := MULx(IP, tcpAmount, AUs)
-
-	return AU
+    tcpAmount := TruncToCurrency(cpAmount)
+    NumberDigits := Count4Coma(cpAmount)
+    IP := uint32(NumberDigits) + CurrencyPrecision
+    AU := MULx(IP, tcpAmount, AUs)
+    
+    return AU
 }
 
 // ================================================
@@ -1346,27 +1347,27 @@ func Convert2AU(cpAmount *p.Decimal) *p.Decimal {
 // AttoPlasm2String converts a CryptoPlasm AUs (AttoPlasms)
 // into a slice of strings
 func AttoPlasm2String(Number *p.Decimal) []string {
-	var SliceStr []string
-	Ten := p.NFI(10)
-	AuDigits := Number.NumDigits()
-	Exp := AuDigits - 1
-	IP := uint32(AuDigits)
-	//Exp := p.NFI(NumberDigitsAU - 1)
-	ToSequence := Number
-	for i := Exp; i >= 0; i-- {
-		idec := p.NFI(i)
-		Power := POWx(IP, Ten, idec)
-		Division := DIVx(IP, ToSequence, Power)
-		DigitIs := TruncateCustom(Division, 0)
-		DI := p.INT64(DigitIs)
-		DigitIsString := strconv.Itoa(int(DI))
-		SliceStr = append(SliceStr, DigitIsString)
-
-		Rest := SUBx(IP, Division, DigitIs)
-		SmallAU := MULx(IP, Rest, Power)
-		ToSequence = SmallAU
-	}
-	return SliceStr
+    var SliceStr []string
+    Ten := p.NFI(10)
+    AuDigits := Number.NumDigits()
+    Exp := AuDigits - 1
+    IP := uint32(AuDigits)
+    //Exp := p.NFI(NumberDigitsAU - 1)
+    ToSequence := Number
+    for i := Exp; i >= 0; i-- {
+        idec := p.NFI(i)
+        Power := POWx(IP, Ten, idec)
+        Division := DIVx(IP, ToSequence, Power)
+        DigitIs := TruncateCustom(Division, 0)
+        DI := p.INT64(DigitIs)
+        DigitIsString := strconv.Itoa(int(DI))
+        SliceStr = append(SliceStr, DigitIsString)
+        
+        Rest := SUBx(IP, Division, DigitIs)
+        SmallAU := MULx(IP, Rest, Power)
+        ToSequence = SmallAU
+    }
+    return SliceStr
 }
 
 // ================================================
@@ -1381,88 +1382,88 @@ func AttoPlasm2String(Number *p.Decimal) []string {
 // or even separating at 2 position for Lakhs and Crores.
 // Converts 123,432564123546789786 to 123.[432|564|123][546|789|786]
 func KosonicDecimalConversion(cpAmount *p.Decimal) string {
-	var (
-		StringResult  string
-		ComaPosition  int64
-		PointPosition int64
-		DigitTier     int64
-	)
-
-	//String Variable
-	DecimalSeparator := ","
-	ThousandSeparator := "."
-	InsertFront := "["
-	InsertMiddle := "|"
-	InsertEnd := "]"
-
-	if DecimalEqual(cpAmount, p.NFI(0)) == true {
-		StringResult = "0,[000|000|000][000|000|000]"
-	} else {
-		Prec := int64(CurrencyPrecision)
-		AU := Convert2AU(cpAmount)
-		SliceStr := AttoPlasm2String(AU)
-		NumberDigits := Count4Coma(AU)
-
-		InsertString := func(a []string, index int64, value string) []string {
-			if int64(len(a)) == index { // nil or empty slice or after last element
-				return append(a, value)
-			}
-			a = append(a[:index+1], a[index:]...) // index < len(a)
-			a[index] = value
-			return a
-		}
-
-		//Computing the Decimal Separator position
-		if NumberDigits <= (Prec + 1) {
-			ComaPosition = 1
-		} else {
-			ComaPosition = NumberDigits - Prec
-		}
-		//Inserting the Decimal Separator
-		SliceStr = InsertString(SliceStr, ComaPosition, DecimalSeparator)
-
-		//Computing the 1000 Separator positions
-		Difference := NumberDigits - (Prec + 1)
-		if Difference%3 == 0 {
-			DigitTier = 1
-		} else if Difference%3 == 1 {
-			DigitTier = 2
-		} else if Difference%3 == 2 {
-			DigitTier = 3
-		}
-		TSNumber := (NumberDigits - (Prec + 1)) / 3
-
-		//Adding the 1000 Separator as points
-		for i := int64(1); i <= TSNumber; i++ {
-			PointPosition = (i-1)*4 + DigitTier
-			SliceStr = InsertString(SliceStr, PointPosition, ThousandSeparator)
-		}
-
-		//fmt.Println("new slice is", SliceStr)
-		//fmt.Println("Slice Str cu virgula si 1000 separator este", len(SliceStr))
-
-		//Adding Decimal Separators
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)), InsertEnd)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-4), InsertMiddle)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-8), InsertMiddle)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-12), InsertFront)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-13), InsertEnd)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-17), InsertMiddle)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-21), InsertMiddle)
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)-25), InsertFront)
-
-		//Removing "0," from the SliceString, displaying only Decimals, in case os subunitary values.
-		if len(SliceStr) == 28 && SliceStr[0] == "0" {
-			SliceStr = SliceStr[2:]
-		}
-
-		//Converting Slice to string
-		for i := 0; i < len(SliceStr); i++ {
-			StringResult = StringResult + SliceStr[i]
-		}
-	}
-
-	return StringResult
+    var (
+        StringResult  string
+        ComaPosition  int64
+        PointPosition int64
+        DigitTier     int64
+    )
+    
+    //String Variable
+    DecimalSeparator := ","
+    ThousandSeparator := "."
+    InsertFront := "["
+    InsertMiddle := "|"
+    InsertEnd := "]"
+    
+    if DecimalEqual(cpAmount, p.NFI(0)) == true {
+        StringResult = "0,[000|000|000][000|000|000]"
+    } else {
+        Prec := int64(CurrencyPrecision)
+        AU := Convert2AU(cpAmount)
+        SliceStr := AttoPlasm2String(AU)
+        NumberDigits := Count4Coma(AU)
+        
+        InsertString := func(a []string, index int64, value string) []string {
+            if int64(len(a)) == index { // nil or empty slice or after last element
+                return append(a, value)
+            }
+            a = append(a[:index+1], a[index:]...) // index < len(a)
+            a[index] = value
+            return a
+        }
+        
+        //Computing the Decimal Separator position
+        if NumberDigits <= (Prec + 1) {
+            ComaPosition = 1
+        } else {
+            ComaPosition = NumberDigits - Prec
+        }
+        //Inserting the Decimal Separator
+        SliceStr = InsertString(SliceStr, ComaPosition, DecimalSeparator)
+        
+        //Computing the 1000 Separator positions
+        Difference := NumberDigits - (Prec + 1)
+        if Difference%3 == 0 {
+            DigitTier = 1
+        } else if Difference%3 == 1 {
+            DigitTier = 2
+        } else if Difference%3 == 2 {
+            DigitTier = 3
+        }
+        TSNumber := (NumberDigits - (Prec + 1)) / 3
+        
+        //Adding the 1000 Separator as points
+        for i := int64(1); i <= TSNumber; i++ {
+            PointPosition = (i-1)*4 + DigitTier
+            SliceStr = InsertString(SliceStr, PointPosition, ThousandSeparator)
+        }
+        
+        //fmt.Println("new slice is", SliceStr)
+        //fmt.Println("Slice Str cu virgula si 1000 separator este", len(SliceStr))
+        
+        //Adding Decimal Separators
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)), InsertEnd)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-4), InsertMiddle)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-8), InsertMiddle)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-12), InsertFront)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-13), InsertEnd)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-17), InsertMiddle)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-21), InsertMiddle)
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)-25), InsertFront)
+        
+        //Removing "0," from the SliceString, displaying only Decimals, in case os subunitary values.
+        if len(SliceStr) == 28 && SliceStr[0] == "0" {
+            SliceStr = SliceStr[2:]
+        }
+        
+        //Converting Slice to string
+        for i := 0; i < len(SliceStr); i++ {
+            StringResult = StringResult + SliceStr[i]
+        }
+    }
+    
+    return StringResult
 }
 
 // ================================================
@@ -1477,61 +1478,61 @@ func KosonicDecimalConversion(cpAmount *p.Decimal) string {
 // or even separating at 2 position for Lakhs and Crores.
 // A number of 3215432 is converted to [3.215.432]
 func Block2Print(MKSP *p.Decimal) string {
-	var (
-		StringResult  string
-		DigitTier     int64
-		PointPosition int64
-	)
-
-	//String Variable
-	//DecimalSeparator := ","
-	ThousandSeparator := "."
-	InsertFront := "["
-	//InsertMiddle := "|"
-	InsertEnd := "]"
-
-	if DecimalEqual(MKSP, p.NFI(0)) == true {
-		StringResult = InsertFront + "ZERO" + InsertEnd
-	} else {
-		//InsertString Function
-		InsertString := func(a []string, index int64, value string) []string {
-			if int64(len(a)) == index { // nil or empty slice or after last element
-				return append(a, value)
-			}
-			a = append(a[:index+1], a[index:]...) // index < len(a)
-			a[index] = value
-			return a
-		}
-
-		NumberDigits := Count4Coma(MKSP)
-		SliceStr := AttoPlasm2String(MKSP)
-
-		//Computing the 1000 Separator positions
-		Difference := NumberDigits - 1
-		if Difference%3 == 0 {
-			DigitTier = 1
-		} else if Difference%3 == 1 {
-			DigitTier = 2
-		} else if Difference%3 == 2 {
-			DigitTier = 3
-		}
-		TSNumber := (NumberDigits - 1) / 3
-
-		//Adding the 1000 Separator as points
-		for i := int64(1); i <= TSNumber; i++ {
-			PointPosition = (i-1)*4 + DigitTier
-			SliceStr = InsertString(SliceStr, PointPosition, ThousandSeparator)
-		}
-
-		//Inserting Starting and Ending Brackets
-		SliceStr = InsertString(SliceStr, int64(len(SliceStr)), InsertEnd)
-		SliceStr = InsertString(SliceStr, int64(0), InsertFront)
-
-		//Converting Slice to string
-		for i := 0; i < len(SliceStr); i++ {
-			StringResult = StringResult + SliceStr[i]
-		}
-	}
-
-	return StringResult
+    var (
+        StringResult  string
+        DigitTier     int64
+        PointPosition int64
+    )
+    
+    //String Variable
+    //DecimalSeparator := ","
+    ThousandSeparator := "."
+    InsertFront := "["
+    //InsertMiddle := "|"
+    InsertEnd := "]"
+    
+    if DecimalEqual(MKSP, p.NFI(0)) == true {
+        StringResult = InsertFront + "ZERO" + InsertEnd
+    } else {
+        //InsertString Function
+        InsertString := func(a []string, index int64, value string) []string {
+            if int64(len(a)) == index { // nil or empty slice or after last element
+                return append(a, value)
+            }
+            a = append(a[:index+1], a[index:]...) // index < len(a)
+            a[index] = value
+            return a
+        }
+        
+        NumberDigits := Count4Coma(MKSP)
+        SliceStr := AttoPlasm2String(MKSP)
+        
+        //Computing the 1000 Separator positions
+        Difference := NumberDigits - 1
+        if Difference%3 == 0 {
+            DigitTier = 1
+        } else if Difference%3 == 1 {
+            DigitTier = 2
+        } else if Difference%3 == 2 {
+            DigitTier = 3
+        }
+        TSNumber := (NumberDigits - 1) / 3
+        
+        //Adding the 1000 Separator as points
+        for i := int64(1); i <= TSNumber; i++ {
+            PointPosition = (i-1)*4 + DigitTier
+            SliceStr = InsertString(SliceStr, PointPosition, ThousandSeparator)
+        }
+        
+        //Inserting Starting and Ending Brackets
+        SliceStr = InsertString(SliceStr, int64(len(SliceStr)), InsertEnd)
+        SliceStr = InsertString(SliceStr, int64(0), InsertFront)
+        
+        //Converting Slice to string
+        for i := 0; i < len(SliceStr); i++ {
+            StringResult = StringResult + SliceStr[i]
+        }
+    }
+    
+    return StringResult
 }
