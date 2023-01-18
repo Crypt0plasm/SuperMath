@@ -1,8 +1,8 @@
 package SuperMath
 
 import (
+    p "Firefly-APD"
     "fmt"
-    p "github.com/Crypt0plasm/Firefly-APD"
     "os"
     "strconv"
 )
@@ -29,6 +29,7 @@ var (
     c   = LOCPrecisionContext
     AUs = p.NFS(AuPerUnit)
 )
+
 //
 //	        MathFunctions.go				Precision Math Specific Functions
 //		Originally Created as:
