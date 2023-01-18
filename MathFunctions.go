@@ -29,6 +29,7 @@ var (
     c   = LOCPrecisionContext
     AUs = p.NFS(AuPerUnit)
 )
+//
 //	        MathFunctions.go				Precision Math Specific Functions
 //		Originally Created as:
 //		BlockChain_F.Firefly.go			        Cryptoplasm(Koson) Precision Math Specific Functions
